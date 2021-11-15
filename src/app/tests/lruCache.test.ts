@@ -1,6 +1,5 @@
 import { LocalCache } from "../localCache";
 import { initializeClient } from "../../init";
-import { LruCache } from "../lruCache";
 
 // let lruCache: LruCache;
 let localCache : LocalCache;

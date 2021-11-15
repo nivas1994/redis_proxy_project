@@ -10,3 +10,10 @@ test:
 	# docker-compose -p $(PROJECT_NAME)_$(HOST_UID) run --rm $(SERVICE_TARGET) sh -c '\
 	# 	echo "I am `whoami`. My uid is `id -u`." && echo "Docker runs!"' \
 	# && echo success
+
+run:
+
+	docker-compose build
+	
+	docker-compose up -d	
+

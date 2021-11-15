@@ -18,7 +18,7 @@ import { getFromServerCache, setToServerCache } from "./serverCache";
     private keyMap: Map<any, any>; // Hashmap to hold the key , value pair
 
     constructor(limit, expirationTime, serverCacheClient, fillFactor) {
-      validateInputs()
+      
       this.size = 0;
       this.limit = limit;
       this.expirationTime = expirationTime;
