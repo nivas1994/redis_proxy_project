@@ -17,7 +17,7 @@ import { getFromServerCache, setToServerCache } from "./serverCache";
     private fillFactor: number = 1; // Fill factor specifies the max size of the cache map after purging.
     private keyMap: Map<any, any>; // Hashmap to hold the key , value pair
 
-    constructor(limit, expirationTime, serverCacheClient, fillFactor) {
+    constructor(limit, expirationTime, serverCacheClient, fillFactor?) {
       
       this.size = 0;
       this.limit = limit;
