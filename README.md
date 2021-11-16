@@ -55,3 +55,7 @@ Project Setup & Integration | 2 hrs |
 Cache Implementation | 3 hrs |
 Testing Framework    | 2 hrs |
 Commenting and Documentation | 2.5 hrs |
+
+## References
+
+- https://docs.redis.com/latest/rs/references/client_references/client_nodejs/
