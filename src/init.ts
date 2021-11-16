@@ -1,16 +1,17 @@
+import { config } from "./config";
 
 const redis = require('redis');
 
 
 export function initializeClient(forTest: boolean) {
     let redisClient;
-    if ( forTest) {
+    if (forTest) {
          redisClient = redis.createClient({
-            port: 6379
+            port: parseInt(config.redis_port)
         });
     } else {
-         redisClient = redis.createClient({ host: 'redis',
-        port: 6379 });
+         redisClient = redis.createClient({ host: config.redis_host,
+        port: parseInt(config.redis_port) });
     }
 
     return redisClient;
