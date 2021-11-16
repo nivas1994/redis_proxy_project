@@ -1,7 +1,7 @@
 import express, { raw } from 'express';
 import { initializeClient } from './init';
 import { LocalCache, LRUMapEntry } from './app/localCache';
-import { getFromServerCache, setToServerCache } from './app/serverCache';
+import { getFromServerCache, pingServerCache, setToServerCache } from './app/serverCache';
 import { config } from './config';
 import { plainToClass } from 'class-transformer';
 
@@ -26,6 +26,15 @@ app.get('/', (req, res) => {
     return res.send('Redis Proxy Project');  
 });
 
+// Directly calls the backing redis instance to check if it is running
+app.get('/ping-server-cache', async (req, res) => { 
+    const rawData = await pingServerCache (cacheClient);
+    console.log(rawData);
+    res.status(200);
+     res.send(rawData);
+});
+
+
 // Hits the local cache 
 app.get('/get-value/:key', async (req, res) => { 
     const { key } = req.params;
@@ -39,6 +48,7 @@ app.get('/get-value-from-server-cache/:key', async (req, res) => {
     const rawData = await getFromServerCache(key, cacheClient);
     return res.send(rawData);
 });
+
 
 // Directly calls the backing redis instance to set the value for the json object
 

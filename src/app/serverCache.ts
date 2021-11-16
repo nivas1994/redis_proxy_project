@@ -22,6 +22,11 @@ export async function setToServerCache(key: string, value: string, redisClient):
     return  setToServerCache(key, value);
 }
 
+export async function pingServerCache(redisClient): Promise<string> {
+    const pingServerCache = util.promisify(redisClient.ping).bind(redisClient);
+    return  pingServerCache();
+}
+
 export async function deleteFromServerCache(key: string, redisClient): Promise<string> {
     const deleteEntryInServerCache = util.promisify(redisClient.delete).bind(redisClient);
     return  deleteEntryInServerCache(key);
