@@ -1,6 +1,13 @@
-import { LocalCacheInterface } from "./localCacheInterface";
+
+/**
+ * @author: Nivas Narayanasamy
+ * @desc: This class represents the local cache (DLL +HashMap) implementation.
+ */
+
+import { LocalCacheInterface } from "./localCacheInterface"; 
 import { getFromServerCache, setToServerCache } from "./serverCache";
 
+ //Symbol Declarion for the DLL
   const RIGHT = Symbol('right');
   const LEFT = Symbol('left');
   
@@ -28,7 +35,14 @@ import { getFromServerCache, setToServerCache } from "./serverCache";
       this.keyMap = new Map();
     }
   
+    
     public async get(key) {
+      /**
+       * @desc: This method checks if the key exists in the hashMap else tries to get the 
+       *        value for the key from the backing redis instance. And also it acts as a 
+       *        read through cache where the values are set in the map when read 
+       *        from the redis instance
+       */
       let value = this.keyMap.get(key);
       if (!value) {
         await this.getFromServerCacheAndSetLocalCache(key);
@@ -42,8 +56,7 @@ import { getFromServerCache, setToServerCache } from "./serverCache";
       } else {
    
         if (!this.checkIfEntryExpired(value, Date.now())) {
-            console.log("INSIDE local cache");
-            this.updateLatestAndOldest(value);
+            this.updateLeftAndRightPointers(value);
             this.cacheHit++;
             return value.value;
         } else {
@@ -57,12 +70,18 @@ import { getFromServerCache, setToServerCache } from "./serverCache";
     }
 
     public async put(key: string, value: string): Promise<string> {
+      /**
+       * @desc: This method directly sets the value to the backing redis instance 
+       */
       await setToServerCache(key, value, this.serverCacheClient);
       let entry = await getFromServerCache(key, this.serverCacheClient);
       return entry;
     }
 
     public hasKey(key: string): boolean {
+      /**
+       * @desc: This method checks if the map has the key
+       */
       return this.keyMap.has(key);
     } 
     public printCache() {
@@ -70,6 +89,9 @@ import { getFromServerCache, setToServerCache } from "./serverCache";
     }
 
     public getLatest(): string {
+      /**
+       * @desc: This method gets the latest value i.e. the last accessed value.
+       */
       if (this.latest) {
         return this.latest.value;
       } else {
@@ -78,6 +100,9 @@ import { getFromServerCache, setToServerCache } from "./serverCache";
     }
 
     public getOldest(): string {
+      /**
+       * @desc: This method gets the oldest value i.e. least accessed value.  
+       */
       if (this.oldest) {
         return this.oldest.value;
       } else {
@@ -86,6 +111,9 @@ import { getFromServerCache, setToServerCache } from "./serverCache";
     }
 
     public getStats() {
+      /**
+       * @desc: This method returns the current stat of the cache class
+       */
       let stats = {
         'size': this.size,
         'cacheHit': this.cacheHit,
@@ -97,33 +125,10 @@ import { getFromServerCache, setToServerCache } from "./serverCache";
       return stats;
     }
 
-    private updateLatestAndOldest(entry) {
-      if (entry === this.latest) {
-        // Already the most recenlty used entry, so no need to update the list
-        return;
-      }
-      // HEAD--------------TAIL
-      //   <.older   .newer>
-      //  <--- add direction --
-      //   A  B  C  <D>  E
-      if (entry[RIGHT]) {
-        if (entry === this.oldest) {
-          this.oldest = entry[RIGHT];
-        }
-        entry[RIGHT][LEFT] = entry[LEFT]; // C <-- E.
-      }
-      if (entry[LEFT]) {
-        entry[LEFT][RIGHT] = entry[RIGHT]; // C. --> E
-      }
-      entry[RIGHT] = undefined; // D --x
-      entry[LEFT] = this.latest; // D. --> E
-      if (this.latest) {
-        this.latest[RIGHT] = entry; // E. <-- D
-      }
-      this.latest = entry;
-    }
-
     private async getFromServerCacheAndSetLocalCache(key) {
+      /**
+       * @desc: This method tries to get the value for the key from the backing redis instance and processes it.
+       */  
       let entry = await getFromServerCache(key, this.serverCacheClient)!;
       console.log(entry);
       if (!entry) {
@@ -134,45 +139,78 @@ import { getFromServerCache, setToServerCache } from "./serverCache";
     }
 
 
-  
+
     private setLocalCache(key, value) {
+      /**
+       * @desc: This method tries to get the value for the key from the backing redis instance and processes it.
+       */  
       let entry = this.keyMap.get(key);
       if (entry) {
-        // update existing
         entry.value = value;
-        this.updateLatestAndOldest(entry);
+        this.updateLeftAndRightPointers(entry);
         this.updateEntryExpirationTime(entry);
         return this;
       }
-
       entry = (new LRUMapEntry(key, value, this.expirationTime + Date.now()));
-  
       this.keyMap.set(key, entry);
       this.setLatest(entry);
       ++this.size;
       this.purge();
-  
       return this;
     }
 
-    private setLatest(entry) {
+    private updateLeftAndRightPointers(entry) {
+      /**
+       * @desc: This method updates the left and right pointers to the entry in the doubly linked list. 
+       * @example: If the node 4 is used recently, then it has to moved to the tail
+       *              // HEAD--------------TAIL
+                        <.oldest   .latest>
+                        <--- add direction --
+                        1  2  3  <4>  5 
+       */
+      if (entry === this.latest) {
+        // entry is already the most recently used entry , so just return
+        return;
+      }
+      if (entry[RIGHT]) {
+        if (entry === this.oldest) {
+          this.oldest = entry[RIGHT];
+        }
+        entry[RIGHT][LEFT] = entry[LEFT]; // 3 <-- 5
+      }
+      if (entry[LEFT]) {  
+        entry[LEFT][RIGHT] = entry[RIGHT]; // 3 --> 5
+      }
+      entry[RIGHT] = undefined; // 4 = NULL
+      entry[LEFT] = this.latest; // 4 --> 5
       if (this.latest) {
-        // link previous tail to the new tail (entry)
+        this.latest[RIGHT] = entry; // 5 <-- 4
+      }
+      this.latest = entry;
+    }
+
+
+    private setLatest(entry) {
+      /**
+       * @desc: This method updates the previous tail and sets it to the latest added entry
+       */ 
+      if (this.latest) {
         this.latest[RIGHT] = entry;
         entry[LEFT] = this.latest;
       } else {
-        // we're first in -- yay
         this.oldest = entry;
       }  
       this.latest = entry;
     }
 
     private purge() {
-      /* 
-        Default PurgeFactor is 1, If a purge factor is specified at the constructor,
-        then use it to purge the cache to the factor provided. i.e. 
-        when the cache is purged it's size is reduced at least to 3/4th of the maximum size
-      */
+      /**
+       * @desc: this method purges when the size > the max size. 
+       * @note: Default PurgeFactor is 1, If a purge factor is specified at the constructor,
+       *        then use it to purge the cache to the factor provided. i.e. 
+       *        when the cache is purged it's size is reduced at least to 3/4th of the maximum size
+       */
+      
       if (this.size > this.limit ) {
         let fillSize = Math.round(this.size * this.fillFactor);
         console.log("purge limit " + fillSize);
@@ -187,19 +225,19 @@ import { getFromServerCache, setToServerCache } from "./serverCache";
     }
   
     private shift() {
+      /**
+       * @desc: This method removes the head node i.e the least used element in the cache 
+       */ 
       var entry = this.oldest;
       if (entry) {
         if (this.oldest[RIGHT]) {
-          // advance the list
           this.oldest = this.oldest[RIGHT];
           this.oldest[LEFT] = undefined;
         } else {
-          // the cache is exhausted
+          // Cache is empty
           this.oldest = undefined;
           this.latest = undefined;
         }
-        // Remove last strong reference to <entry> and remove links from the purged
-        // entry being returned:
         entry[RIGHT] = entry[LEFT] = undefined;
         this.keyMap.delete(entry.key);
         --this.size;

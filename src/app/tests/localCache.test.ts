@@ -1,7 +1,6 @@
 import { LocalCache } from "../localCache";
 import { initializeClient } from "../../init";
 
-// let lruCache: LruCache;
 let localCache : LocalCache;
 let cacheClient;
 
@@ -9,35 +8,10 @@ describe('Get request', () => {
 
     beforeAll(async () => {
         cacheClient = initializeClient(true);
-        // lruCache = new LruCache(10, 1000, cacheClient);
         localCache = new LocalCache(3, 1000, cacheClient, 1);
         cacheClient.flushall();
-        // await fillRedisCache(lruCache);
         await fillDLLRedisCache(localCache);
     });
-
-
-
-    // test('Get from Server Cache ', async () => {
-
-    //     let result = await lruCache.get('1');
-    //     expect(result).toEqual('John');
-
-    //     result = await lruCache.get('2');
-    //     expect(result).toEqual('Danny');
-
-    //     result = await lruCache.get('3');
-    //     expect(result).toEqual('Mob');
-
-    //     result = await lruCache.get('4');
-    //     expect(result).toEqual('Harry');
-
-    //     result = await lruCache.get('5');
-    //     expect(result).toEqual(null);
-
-    //     lruCache.printCache();
-    // });
-
 
     test('Get from Server Cache ', async () => {
 
@@ -80,13 +54,9 @@ describe('Get request', () => {
         expect(localCache.hasKey('11')).toBeTruthy();
         let result = await localCache.get('11');
         expect(result).toEqual('ping');
-
         expect(localCache.hasKey('22')).toBeTruthy();
         result = await localCache.get('22');
         expect(result).toEqual('pong');
-
-        console.log(localCache.getStats());
-
         expect(localCache.getStats().cacheHit).toEqual(2);
         expect(localCache.getStats().cacheMiss).toEqual(4);
     });
@@ -94,49 +64,42 @@ describe('Get request', () => {
 
     test('Least Recently Used Eviction ', async () => {
 
-        localCache.printCache();
-
         await localCache.put('33', 'pang');
         await localCache.put('44', 'pung');
 
         let result = await localCache.get('33');
         result = await localCache.get('44');
 
-        localCache.printCache();
-
-        // expect(localCache.hasKey('11')).toBeFalsy();
-
-        // expect(localCache.getStats().size).toEqual(2);
-
+        expect(localCache.hasKey('11')).toBeFalsy();
+        expect(localCache.getStats().size).toEqual(3);
+        expect(localCache.getLatest()).toEqual('pung');
+        expect(localCache.getOldest()).toEqual('pong');
 
     });
 
+    test('Testing Limit Factor ', async () => {
 
-    // test('Check Expiration time  ', async () => {
+        localCache = new LocalCache(5, 1000, cacheClient, 0.50);
 
-    //     expect(localCache.hasKey('11')).toBeTruthy();
-    //     let result = await localCache.get('11');
-    //     expect(result).toEqual('Pot');
+        await localCache.put('1', 'one');
+        await localCache.put('2', 'two');
+        await localCache.put('3', 'three');
+        await localCache.put('4', 'four');
+        await localCache.put('5', 'five');
+        await localCache.put('6', 'five');
 
-    //     expect(localCache.hasKey('22')).toBeTruthy();
-    //     result = await localCache.get('22');
-    //     expect(result).toEqual('pit');
+        await localCache.get('1');
+        await localCache.get('2');
+        await localCache.get('3');
+        await localCache.get('4');
+        await localCache.get('5');
+        await localCache.get('6');
 
-    //     expect(localCache.hasKey('33')).toBeTruthy();
-    //     result = await localCache.get('33');
-    //     expect(result).toEqual('poop');
+        localCache.printCache();
+        // Since we have set the limit factor , the last 3 entries ((Math.Round(5 * 0.50)) = 3) would be removed once the size > limit size 
+        expect(localCache.getStats().size).toEqual(2);
 
-    //     expect(localCache.hasKey('44')).toBeTruthy();
-    //     result = await localCache.get('44');
-    //     expect(result).toEqual('pin');
-
-    //     expect(localCache.hasKey('55')).toBeFalsy();
-    //     result = await localCache.get('55');
-    //     expect(result).toEqual(null);
-
-    //     localCache.printCache();
-    // });
-
+    });
 
     afterAll(done => {
         cacheClient.quit();
@@ -144,25 +107,9 @@ describe('Get request', () => {
     });
 
 
-    // test('Get from LRU Cache ', async () => {
-    //     expect(lruCache.hasKey('1')).toBeTruthy();
-    //     expect(lruCache.hasKey('2')).toBeTruthy();
-    //     expect(lruCache.hasKey('3')).toBeTruthy();
-    //     expect(lruCache.hasKey('4')).toBeTruthy();
-    //     expect(lruCache.hasKey('5')).toBeFalsy();
-
-
-    // });
 });
 
 
-// async function fillRedisCache(lruCache: LruCache) {
-//     await lruCache.put('1', 'John');
-//     await lruCache.put('2', 'Danny');
-//     await lruCache.put('3', 'Mob');
-//     await lruCache.put('4', 'Harry');
-
-// }
 
 async function fillDLLRedisCache(dllCache: LocalCache) {
     await dllCache.put('11', 'ping');
