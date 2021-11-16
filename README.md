@@ -59,3 +59,4 @@ Commenting and Documentation | 2.5 hrs |
 ## References
 
 - https://docs.redis.com/latest/rs/references/client_references/client_nodejs/
+- https://www.interviewcake.com/concept/java/lru-cache
