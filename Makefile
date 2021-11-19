@@ -5,7 +5,7 @@ test:
 	
 	docker-compose up -d
 
-	npm run test
+	./integration_test.sh
 
 run:
 

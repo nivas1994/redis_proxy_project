@@ -4,6 +4,8 @@
  * @desc: This file contains the calls to the backing redis instance
  */
 
+import { LRUMapEntry } from "./localCache";
+
 const util = require('util');
 
 export async function getFromServerCache(  key: string, redisClient): Promise<string> {
@@ -14,12 +16,23 @@ export async function getFromServerCache(  key: string, redisClient): Promise<st
     return  getFromServerCache(key);
 }
 
+
+export async function setValuesToServerCache(mapValues: LRUMapEntry<String, String>[], redisClient) {
+    /**
+     * @desc: This method sets the value for the specifed key in the backing redis instance 
+     */
+    console.log(mapValues);
+    for(let mapValue of mapValues) {
+       await setToServerCache(mapValue.key, mapValue.value, redisClient);
+    }
+}
+
 export async function setToServerCache(key: string, value: string, redisClient): Promise<string> {
     /**
      * @desc: This method sets the value for the specifed key in the backing redis instance 
      */
-    const setToServerCache = util.promisify(redisClient.set).bind(redisClient);
-    return  setToServerCache(key, value);
+    const setToServerCachePromise = util.promisify(redisClient.set).bind(redisClient);
+    return  setToServerCachePromise(key, value);
 }
 
 export async function pingServerCache(redisClient): Promise<string> {

@@ -17,13 +17,20 @@ const PORT =  config.node_port;
 
 app.listen(PORT, () => {
     cacheClient = initializeClient(false);
-    localCache = new LocalCache(parseInt(config.max_local_cache_size),parseInt(config.global_expiration), cacheClient);
+    localCache = new LocalCache(parseInt(config.max_local_cache_size),parseInt(config.global_expiration), cacheClient, parseInt(config.limit_factor));
     console.log(`server running on ${PORT} `);
     
 });
  
 app.get('/', (req, res) => {
     return res.send('Redis Proxy Project');  
+});
+
+
+// Directly calls the backing redis instance to check if it is running
+app.get('/ping-local', async (req, res) => { 
+    res.status(200);
+    res.send("PONG");
 });
 
 // Directly calls the backing redis instance to check if it is running
@@ -42,6 +49,13 @@ app.get('/get-value/:key', async (req, res) => {
     return res.send(rawData);
 });
 
+// Check if the key exists in the local cache
+app.get('/has-key/:key', async (req, res) => { 
+    const { key } = req.params;
+    const rawData = await localCache.hasKey(key);
+    return res.send(rawData);
+});
+
 // Directly calls the backing redis instance to get the value for the key
 app.get('/get-value-from-server-cache/:key', async (req, res) => { 
     const { key } = req.params;
@@ -51,11 +65,30 @@ app.get('/get-value-from-server-cache/:key', async (req, res) => {
 
 
 // Directly calls the backing redis instance to set the value for the json object
-
 app.post('/put-value-to-server-cache', async (req, res) => { 
     let entry = plainToClass(LRUMapEntry, req.body as LRUMapEntry<string, string>);
     const rawData = await setToServerCache(entry.key, entry.value, cacheClient);
     return res.send(rawData);
 }); 
 
+// Directly calls the backing redis instance to set a array of key-value pair
+app.post('/put-values-to-server-cache', async (req, res) => { 
+    console.log(req);
+    let values = plainToClass(LRUMapEntry, req.body);
+    console.log(values);
+    const rawData = await setToServerCache(values.key, values.value, cacheClient);
+    return res.send(rawData);
+}); 
+
+// Get the current stat of the cache
+app.get('/get-oldest', async (req, res) => { 
+    const rawData =  localCache.getOldestKey();
+    return res.send(rawData);
+});
+
+// Get the current stat of the cache
+app.get('/get-stats', async (req, res) => { 
+    const rawData =  localCache.getStats();
+    return res.send(rawData);
+});
 

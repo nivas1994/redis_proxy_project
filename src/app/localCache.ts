@@ -88,23 +88,23 @@ import { getFromServerCache, setToServerCache } from "./serverCache";
       console.log(this.keyMap);
     }
 
-    public getLatest(): string {
+    public getLatestKey(): string {
       /**
        * @desc: This method gets the latest value i.e. the last accessed value.
        */
       if (this.latest) {
-        return this.latest.value;
+        return this.latest.key;
       } else {
         return "";
       }
     }
 
-    public getOldest(): string {
+    public getOldestKey(): string {
       /**
        * @desc: This method gets the oldest value i.e. least accessed value.  
        */
       if (this.oldest) {
-        return this.oldest.value;
+        return this.oldest.key;
       } else {
         return "";
       }
@@ -118,7 +118,7 @@ import { getFromServerCache, setToServerCache } from "./serverCache";
         'size': this.size,
         'cacheHit': this.cacheHit,
         'cacheMiss': this.cacheMiss,
-        'purgeFacor': this.fillFactor,
+        'purgeFactor': this.fillFactor,
         'limit': this.limit,
         'expirationTime': this.expirationTime
       };
@@ -212,6 +212,7 @@ import { getFromServerCache, setToServerCache } from "./serverCache";
        */
       
       if (this.size > this.limit ) {
+
         let fillSize = Math.round(this.size * this.fillFactor);
         console.log("purge limit " + fillSize);
         let purgeSize = this.size - fillSize;

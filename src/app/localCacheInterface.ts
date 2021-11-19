@@ -6,9 +6,9 @@ export interface LocalCacheInterface {
 
     hasKey(key: string): boolean;
 
-    getLatest(): string;
+    getLatestKey(): string;
 
-    getOldest(): string;
+    getOldestKey(): string;
     
     printCache();
 }

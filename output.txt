@@ -1,0 +1,34 @@
+
+ 1) Pinging the proxy to check if it is alive 
+SUCCESS: Local Server Alive
+
+ 2) Pinging the proxy to check if the redis server is alive
+SUCCESS: Redis Server Alive
+
+ 3) Adding Values to the redis cache
+SUCCESS: Addeded data : {"key":"11", "value":"ping"}
+SUCCESS: Addeded data : {"key":"22", "value":"pong"}
+SUCCESS: Addeded data : {"key":"33", "value":"pan"}
+SUCCESS: Addeded data : {"key":"44", "value":"brown"}
+SUCCESS: Addeded data : {"key":"55", "value":"garcia"}
+SUCCESS: Addeded data : {"key":"66", "value":"linda"}
+
+ 4)Get Values from redis cache directly
+SUCCESS: Got Value from the server cache pong
+
+ 5)Get Values from local cache
+SUCCESS: Got Value from the cache for key: 11
+SUCCESS: Got Value from the cache for key: 22
+
+ 6)Get Values from local cache)
+SUCCESS: Got Value from the cache for key: 11
+SUCCESS: Got Value from the cache for key: 22
+SUCCESS: local cache has key 11
+SUCCESS: local cache has key 22
+
+ 7) LRU Eviction
+SUCCESS: last used key evicted , key : 11
+SUCCESS: Now oldest key in the cache is 22
+
+ 8) Get Current stat of local cache
+Current Cache Stat : {"size":5,"cacheHit":2,"cacheMiss":6,"purgeFactor":1,"limit":5,"expirationTime":10000}

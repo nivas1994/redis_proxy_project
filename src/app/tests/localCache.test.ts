@@ -72,8 +72,8 @@ describe('Get request', () => {
 
         expect(localCache.hasKey('11')).toBeFalsy();
         expect(localCache.getStats().size).toEqual(3);
-        expect(localCache.getLatest()).toEqual('pung');
-        expect(localCache.getOldest()).toEqual('pong');
+        expect(localCache.getLatestKey()).toEqual('pung');
+        expect(localCache.getOldestKey()).toEqual('pong');
 
     });
 
