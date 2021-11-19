@@ -53,9 +53,9 @@ Component | Time Taken |
 --- | --- | 
 Requirement Analysis (Redis)   | 1 hrs | 
 Docker (Education & Setup)    | 2.5 hrs | 
-Project Setup & Integration | 2 hrs |
+Project Setup & Integration | 3 hrs |
 Cache Implementation | 3 hrs |
-Testing Framework    | 3 hrs |
+Testing Framework    | 5 hrs |
 Commenting and Documentation | 2.5 hrs |
 
 ## References
