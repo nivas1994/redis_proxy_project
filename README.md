@@ -39,6 +39,8 @@ A Redis Proxy Service which uses a LRU Cache
 cd redis_proxy_project
 make test
 ```
+script "integration_test.sh" executes E2E test cases and outputs the values to "output.txt"
+
 ### Single Click Run
 ```
 cd redis_proxy_project
