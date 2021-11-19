@@ -39,6 +39,8 @@ A Redis Proxy Service which uses a LRU Cache
 cd redis_proxy_project
 make test
 ```
+script "integration_test.sh" executes E2E test cases and outputs the values to "output.txt"
+
 ### Single Click Run
 ```
 cd redis_proxy_project
@@ -51,9 +53,9 @@ Component | Time Taken |
 --- | --- | 
 Requirement Analysis (Redis)   | 1 hrs | 
 Docker (Education & Setup)    | 2.5 hrs | 
-Project Setup & Integration | 2 hrs |
+Project Setup & Integration | 3 hrs |
 Cache Implementation | 3 hrs |
-Testing Framework    | 3 hrs |
+Testing Framework    | 5 hrs |
 Commenting and Documentation | 2.5 hrs |
 
 ## References
