@@ -13,14 +13,14 @@ SUCCESS: Addeded data : {"key":"44", "value":"brown"}
 SUCCESS: Addeded data : {"key":"55", "value":"garcia"}
 SUCCESS: Addeded data : {"key":"66", "value":"linda"}
 
- 4)Get Values from redis cache directly
+ 4) Get Values from redis cache directly
 SUCCESS: Got Value from the server cache pong
 
- 5)Get Values from local cache
+ 5) Get Values from local cache
 SUCCESS: Got Value from the cache for key: 11
 SUCCESS: Got Value from the cache for key: 22
 
- 6)Get Values from local cache)
+ 6) Get Values from local cache
 SUCCESS: Got Value from the cache for key: 11
 SUCCESS: Got Value from the cache for key: 22
 SUCCESS: local cache has key 11

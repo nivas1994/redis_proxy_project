@@ -1,13 +1,15 @@
-sleep 2
+echo " Initializing tests...."
 
 dataFile='integration_test_data.txt'
 outputFile='output.txt'
 port='4000'
+PROXY_PING_RESPONSE=""
+REDIS_PING_RESPONSE=""
 SERVER_GET_RESPONSE=""
 SERVER_HAS_KEY_RESPONSE=""
 SERVER_POST_RESPONSE=""
 
-> $outputFile
+> $outputFile  # Clearing the output file before running tests
 
 
 function getValue {
@@ -23,6 +25,19 @@ function addValueToRedis {
 }
 
 
+until [ \
+  "$(curl -s -w '%{http_code}' -o /dev/null "http://localhost:${port}/ping-local")" \
+  -eq 200 ] && [ \
+  "$(curl -s -w '%{http_code}' -o /dev/null "http://localhost:${port}/ping-server-cache")" \
+  -eq 200 ]
+do
+  sleep 5
+done
+
+echo "\n Running tests..."
+
+echo "\n Running test 1) Pinging the proxy to check if it is alive"
+
 echo "\n 1) Pinging the proxy to check if it is alive " >> $outputFile; 
 
    SERVER_ALIVE_RESPONSE=$(curl -s "http://localhost:${port}/ping-local"  --silent)
@@ -34,6 +49,8 @@ echo "\n 1) Pinging the proxy to check if it is alive " >> $outputFile;
       echo "Local Server Not Alive , Stopping tests" >> $outputFile;
    fi
 
+
+echo "\n Running test 2) Pinging the proxy to check if the redis server is alive"
 
 echo "\n 2) Pinging the proxy to check if the redis server is alive" >> $outputFile; 
 
@@ -47,6 +64,8 @@ echo "\n 2) Pinging the proxy to check if the redis server is alive" >> $outputF
    fi
 
 # Adding the key-value pair from integration_test_data.txt file to redis
+
+echo "\n Running test 3) Adding Values to the redis cache"
 echo "\n 3) Adding Values to the redis cache" >> $outputFile; 
 
    while IFS= read -r line
@@ -62,7 +81,8 @@ echo "\n 3) Adding Values to the redis cache" >> $outputFile;
    done < $dataFile
 
 # Getting the values from the redis server
-echo "\n 4)Get Values from redis cache directly" >> $outputFile
+echo "\n Running test 4) Get Values from redis cache directly"
+echo "\n 4) Get Values from redis cache directly" >> $outputFile
 
     key="22"  
     SERVER_RESPONSE=$(curl http://localhost:${port}/get-value-from-server-cache/${key} --silent);
@@ -76,7 +96,8 @@ echo "\n 4)Get Values from redis cache directly" >> $outputFile
 
 # Get Values from local cache i.e. first time proxy tries to get the keys <11, 22> from local cache ,
 # if not found, gets it from redis and add to local cache)
-echo "\n 5)Get Values from local cache" >> $outputFile;
+echo "\n Running test 5) Get Values from local cache"
+echo "\n 5) Get Values from local cache" >> $outputFile;
 
 
     key="11"  
@@ -101,7 +122,8 @@ echo "\n 5)Get Values from local cache" >> $outputFile;
 
 # Get Values from local cache i.e. second time app should return the values from the local cache, Checking if keys <11, 22> is
 # available in local cache using hasKey Method
-echo "\n 6)Get Values from local cache)" >> $outputFile;
+echo "\n Running test 6) Get Values from local cache"
+echo "\n 6) Get Values from local cache" >> $outputFile;
 
     key="11"  
     getValue $key;
@@ -144,6 +166,7 @@ echo "\n 6)Get Values from local cache)" >> $outputFile;
     fi  
 
 # Max Size of the cache is set to 5. Now add 4 more keys and check if the Least used key "11" is evicted and "12" is set the oldest key
+echo "\n Running test 7) LRU Eviction"
 echo "\n 7) LRU Eviction" >> $outputFile
     
     arr=("33" "44" "55" "66")
@@ -183,4 +206,5 @@ echo "\n 8) Get Current stat of local cache" >> $outputFile
 
     echo "Current Cache Stat : ${SERVER_RESPONSE}" >> $outputFile;
 
+echo "\n Completed tests..."
 

@@ -36,9 +36,14 @@ app.get('/ping-local', async (req, res) => {
 // Directly calls the backing redis instance to check if it is running
 app.get('/ping-server-cache', async (req, res) => { 
     const rawData = await pingServerCache (cacheClient);
-    console.log(rawData);
-    res.status(200);
-     res.send(rawData);
+    console.log("rawdate: " + rawData);
+    if (rawData == 'PONG') {
+        res.status(200);
+        res.send(rawData);
+    } else {
+        res.status(404);
+        res.send("Not alive");
+    }
 });
 
 
