@@ -28,7 +28,7 @@ A Redis Proxy Service which uses a LRU Cache
 ## Algorithmic Complexities 
 
 - The Local Cache is maintained by a Doubly Linked List and a HashMap (Classic LRU Implementation) which yields a O(1) for retrieving , adding and removing elements from the cache. 
-- Note : JS V8 Map has a average time complexity of O(1) , but I have implemented a (Doubly Linked List + Map) approach for the purpose of the project since it has mentioned in the requirements that it tests the candidates ability to build software solution based on a problem statement. 
+- Note : JS V8 Map has a average time complexity of O(1) , but I have implemented a (Doubly Linked List + Map) approach.
 - Implemented a optional fillFactor that serves for the purpose : put is O(N) in the worst case in classic map implementation, that happens if the cache is filled up on insertion , For example if fill factor is set to : 0.75, when the cache is purged it's size is reduced at least to 3/4th of the maximum size
 
 
